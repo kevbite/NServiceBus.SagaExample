@@ -20,18 +20,18 @@ namespace NServiceBus.SagaExample.Sagas.Arears
         protected override void ConfigureHowToFindSaga(SagaPropertyMapper<ArearsSagaData> mapper)
         {
             mapper.ConfigureMapping<AgreementCreatedEvent>(x => x.AgreementId)
-                .ToSaga(x => x.Id);
+                .ToSaga(x => x.AgreementId);
 
             mapper.ConfigureMapping<PaymentTakenEvent>(x => x.AgreementId)
-                .ToSaga(x => x.Id);
+                .ToSaga(x => x.AgreementId);
 
             mapper.ConfigureMapping<AgreementSettledEvent>(x => x.AgreementId)
-                .ToSaga(x => x.Id);
+                .ToSaga(x => x.AgreementId);
         }
 
         public void Handle(AgreementCreatedEvent message)
         {
-            Data.Id = message.AgreementId;
+            Data.AgreementId = message.AgreementId;
             Data.AgreementCreatedAt = DateTime.UtcNow;
 
             RequestTimeout<ArearsOneMonthTimeout>(TimeSpan.FromSeconds(5));
@@ -39,7 +39,6 @@ namespace NServiceBus.SagaExample.Sagas.Arears
         
         public void Handle(PaymentTakenEvent message)
         {
-            Data.Id = message.AgreementId;
             Data.PaymentTakenAt = DateTime.UtcNow;
             Data.MonthsInArears = 0;
 
@@ -50,7 +49,7 @@ namespace NServiceBus.SagaExample.Sagas.Arears
         {
             if (Data.MonthsInArears >= 12)
             {
-                _bus.Publish(new AgreementDefaultedEvent {AgreementId = Data.Id});
+                _bus.Publish(new AgreementDefaultedEvent {AgreementId = Data.AgreementId});
 
                 MarkAsComplete();
             }
@@ -60,7 +59,7 @@ namespace NServiceBus.SagaExample.Sagas.Arears
 
                 _bus.Publish(new AgreementInArearsEvent
                 {
-                    AgreementId = Data.Id,
+                    AgreementId = Data.AgreementId,
                     MonthsInArears = Data.MonthsInArears
                 });
                 
